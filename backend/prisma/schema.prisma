@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  displayName  String   @map("display_name")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  companies       Company[]
+  jobApplications JobApplication[]
+
+  @@map("users")
+}
+
+model Company {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  name       String
+  websiteUrl String?  @map("website_url")
+  country    String?
+  notes      String?
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobApplications JobApplication[]
+
+  @@index([userId])
+  @@index([userId, name])
+  @@map("companies")
+}
+
+model JobApplication {
+  id            String    @id @default(uuid())
+  userId        String    @map("user_id")
+  companyId     String    @map("company_id")
+  positionTitle String    @map("position_title")
+  status        String
+  appliedAt     DateTime? @map("applied_at")
+  source        String?
+  location      String?
+  salaryMin     Int?      @map("salary_min")
+  salaryMax     Int?      @map("salary_max")
+  jobPostUrl    String?   @map("job_post_url")
+  notes         String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([companyId])
+  @@index([userId, status])
+  @@index([userId, updatedAt])
+  @@map("job_applications")
+}
