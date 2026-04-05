@@ -33,4 +33,8 @@ export class JobApplicationsService {
       total: items.length,
     };
   }
+
+  async findOne(id: string) {
+    return { id };
+  }
 }
