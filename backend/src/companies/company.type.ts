@@ -4,8 +4,8 @@ export type CompanyListItem = {
   websiteUrl: string | null;
   country: string | null;
   notes: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type PaginatedResponse<T> = {
