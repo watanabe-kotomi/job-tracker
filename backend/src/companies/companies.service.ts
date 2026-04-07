@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ListCompaniesQueryDto } from './dto/list-companies-query.dto';
 import { CompanyListItem, PaginatedResponse } from './company.type';
 import { PrismaService } from 'prisma/prisma.service';
-import { contains } from 'class-validator';
+import { getPagination } from '../common/utils/pagination';
 
 @Injectable()
 export class CompaniesService {
@@ -11,9 +11,10 @@ export class CompaniesService {
   async findAll(
     query: ListCompaniesQueryDto,
   ): Promise<PaginatedResponse<CompanyListItem>> {
-    const page = query.page ?? 1;
-    const limit = query.limit ?? 20;
-    const skip = (page - 1) * limit;
+    const { page, limit, skip } = getPagination({
+      page: query.page,
+      limit: query.limit,
+    });
 
     const user = await this.prisma.user.findUnique({
       where: { email: 'demo@example.com' },

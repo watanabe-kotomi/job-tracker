@@ -7,6 +7,7 @@ import {
   PaginatedResponse,
 } from './job-application.types';
 import { JOB_APPLICATION_NOT_FOUND_MESSAGE } from './job-applications.constants';
+import { getPagination } from '../common/utils/pagination';
 
 @Injectable()
 export class JobApplicationsService {
@@ -15,9 +16,10 @@ export class JobApplicationsService {
   async findAll(
     query: ListJobApplicationsQueryDto,
   ): Promise<PaginatedResponse<JobApplicationListItem>> {
-    const page = query.page ?? 1;
-    const limit = query.limit ?? 20;
-    const skip = (page - 1) * limit;
+    const { page, limit, skip } = getPagination({
+      page: query.page,
+      limit: query.limit,
+    });
 
     const user = await this.prisma.user.findUnique({
       where: { email: 'demo@example.com' },
