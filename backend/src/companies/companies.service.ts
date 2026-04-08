@@ -61,8 +61,8 @@ export class CompaniesService {
       websiteUrl: company.websiteUrl,
       country: company.country,
       notes: company.notes,
-      createdAt: company.createdAt,
-      updatedAt: company.updatedAt,
+      createdAt: company.createdAt.toISOString(),
+      updatedAt: company.updatedAt.toISOString(),
     }));
 
     return {
