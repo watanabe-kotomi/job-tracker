@@ -8,6 +8,7 @@ import {
 } from './job-application.types';
 import { JOB_APPLICATION_NOT_FOUND_MESSAGE } from './job-applications.constants';
 import { getPagination } from '../common/utils/pagination';
+import { CreateJobApplicationDto } from './dto/create-job-application.dto';
 
 @Injectable()
 export class JobApplicationsService {
@@ -147,5 +148,9 @@ export class JobApplicationsService {
       createdAt: application.createdAt.toISOString(),
       updatedAt: application.updatedAt.toISOString(),
     };
+  }
+
+  async create(body: CreateJobApplicationDto) {
+    return body;
   }
 }
