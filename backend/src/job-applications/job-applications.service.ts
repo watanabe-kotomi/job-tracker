@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 import { ListJobApplicationsQueryDto } from './dto/list-job-applications-query.dto';
 import {
@@ -6,8 +10,13 @@ import {
   JobApplicationListItem,
   PaginatedResponse,
 } from './job-application.types';
-import { JOB_APPLICATION_NOT_FOUND_MESSAGE } from './job-applications.constants';
+import {
+  COMPANY_NOT_FOUND_MESSAGE,
+  JOB_APPLICATION_NOT_FOUND_MESSAGE,
+} from './job-applications.constants';
 import { getPagination } from '../common/utils/pagination';
+import { CreateJobApplicationDto } from './dto/create-job-application.dto';
+import { toJobApplicationDetail } from './job-applications.mapper';
 
 @Injectable()
 export class JobApplicationsService {
@@ -124,28 +133,51 @@ export class JobApplicationsService {
       throw new NotFoundException(JOB_APPLICATION_NOT_FOUND_MESSAGE);
     }
 
-    return {
-      id: application.id,
-      company: {
-        id: application.company.id,
-        name: application.company.name,
-        websiteUrl: application.company.websiteUrl,
-        country: application.company.country,
-        notes: application.company.notes,
+    return toJobApplicationDetail(application);
+  }
+
+  async create(body: CreateJobApplicationDto): Promise<JobApplicationDetail> {
+    const user = await this.prisma.user.findUnique({
+      where: { email: 'demo@example.com' },
+    });
+
+    if (!user) {
+      throw new NotFoundException(JOB_APPLICATION_NOT_FOUND_MESSAGE);
+    }
+
+    const company = await this.prisma.company.findFirst({
+      where: {
+        id: body.companyId,
+        userId: user.id,
       },
-      positionTitle: application.positionTitle,
-      status: application.status,
-      appliedAt: application.appliedAt
-        ? application.appliedAt.toISOString().slice(0, 10)
-        : null,
-      source: application.source,
-      location: application.location,
-      salaryMin: application.salaryMin,
-      salaryMax: application.salaryMax,
-      jobPostUrl: application.jobPostUrl,
-      notes: application.notes,
-      createdAt: application.createdAt.toISOString(),
-      updatedAt: application.updatedAt.toISOString(),
-    };
+    });
+
+    if (!company) {
+      throw new NotFoundException(COMPANY_NOT_FOUND_MESSAGE);
+    }
+
+    if (
+      body.salaryMin !== undefined &&
+      body.salaryMax !== undefined &&
+      body.salaryMin > body.salaryMax
+    ) {
+      throw new BadRequestException(
+        'salaryMin must be less than or equal to salaryMax',
+      );
+    }
+
+    const application = await this.prisma.jobApplication.create({
+      data: {
+        userId: user.id,
+        companyId: body.companyId,
+        positionTitle: body.positionTitle,
+        status: body.status,
+      },
+      include: {
+        company: true,
+      },
+    });
+
+    return toJobApplicationDetail(application);
   }
 }
