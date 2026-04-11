@@ -16,7 +16,7 @@ import {
 } from './job-applications.constants';
 import { getPagination } from '../common/utils/pagination';
 import { CreateJobApplicationDto } from './dto/create-job-application.dto';
-import { application } from 'express';
+import { toJobApplicationDetail } from './job-applications.mapper';
 
 @Injectable()
 export class JobApplicationsService {
@@ -133,29 +133,7 @@ export class JobApplicationsService {
       throw new NotFoundException(JOB_APPLICATION_NOT_FOUND_MESSAGE);
     }
 
-    return {
-      id: application.id,
-      company: {
-        id: application.company.id,
-        name: application.company.name,
-        websiteUrl: application.company.websiteUrl,
-        country: application.company.country,
-        notes: application.company.notes,
-      },
-      positionTitle: application.positionTitle,
-      status: application.status,
-      appliedAt: application.appliedAt
-        ? application.appliedAt.toISOString().slice(0, 10)
-        : null,
-      source: application.source,
-      location: application.location,
-      salaryMin: application.salaryMin,
-      salaryMax: application.salaryMax,
-      jobPostUrl: application.jobPostUrl,
-      notes: application.notes,
-      createdAt: application.createdAt.toISOString(),
-      updatedAt: application.updatedAt.toISOString(),
-    };
+    return toJobApplicationDetail(application);
   }
 
   async create(body: CreateJobApplicationDto): Promise<JobApplicationDetail> {
@@ -200,28 +178,6 @@ export class JobApplicationsService {
       },
     });
 
-    return {
-      id: application.id,
-      company: {
-        id: application.company.id,
-        name: application.company.name,
-        websiteUrl: application.company.websiteUrl,
-        country: application.company.country,
-        notes: application.company.notes,
-      },
-      positionTitle: application.positionTitle,
-      status: application.status,
-      appliedAt: application.appliedAt
-        ? application.appliedAt.toISOString().slice(0, 10)
-        : null,
-      source: application.source,
-      location: application.location,
-      salaryMin: application.salaryMin,
-      salaryMax: application.salaryMax,
-      jobPostUrl: application.jobPostUrl,
-      notes: application.notes,
-      createdAt: application.createdAt.toISOString(),
-      updatedAt: application.updatedAt.toISOString(),
-    };
+    return toJobApplicationDetail(application);
   }
 }
