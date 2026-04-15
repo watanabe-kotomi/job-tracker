@@ -14,3 +14,13 @@ export type PaginatedResponse<T> = {
   limit: number;
   total: number;
 };
+
+export type CompanyDetail = {
+  id: string;
+  name: string;
+  websiteUrl: string | null;
+  country: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
