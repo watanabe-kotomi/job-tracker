@@ -3,6 +3,7 @@ import { ListCompaniesQueryDto } from './dto/list-companies-query.dto';
 import { CompanyListItem, PaginatedResponse } from './company.type';
 import { PrismaService } from 'prisma/prisma.service';
 import { getPagination } from '../common/utils/pagination';
+import { CreateCompanyDto } from './dto/create-company.dto';
 
 @Injectable()
 export class CompaniesService {
@@ -71,5 +72,9 @@ export class CompaniesService {
       limit,
       total,
     };
+  }
+
+  async create(body: CreateCompanyDto) {
+    return body;
   }
 }
