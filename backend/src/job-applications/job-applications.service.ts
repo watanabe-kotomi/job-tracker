@@ -17,6 +17,7 @@ import {
 import { getPagination } from '../common/utils/pagination';
 import { CreateJobApplicationDto } from './dto/create-job-application.dto';
 import { toJobApplicationDetail } from './job-applications.mapper';
+import { UpdateJobApplicationDto } from './dto/update-job-application.dto';
 
 @Injectable()
 export class JobApplicationsService {
@@ -179,5 +180,9 @@ export class JobApplicationsService {
     });
 
     return toJobApplicationDetail(application);
+  }
+
+  async update(id: string, body: UpdateJobApplicationDto) {
+    return { id, ...body };
   }
 }
