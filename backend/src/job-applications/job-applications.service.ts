@@ -18,6 +18,7 @@ import { getPagination } from '../common/utils/pagination';
 import { CreateJobApplicationDto } from './dto/create-job-application.dto';
 import { toJobApplicationDetail } from './job-applications.mapper';
 import { UpdateJobApplicationDto } from './dto/update-job-application.dto';
+import { validateSalaryRange } from './job-applications.validation';
 
 @Injectable()
 export class JobApplicationsService {
@@ -182,7 +183,85 @@ export class JobApplicationsService {
     return toJobApplicationDetail(application);
   }
 
-  async update(id: string, body: UpdateJobApplicationDto) {
-    return { id, ...body };
+  async update(
+    id: string,
+    body: UpdateJobApplicationDto,
+  ): Promise<JobApplicationDetail> {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: 'demo@example.com',
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException(JOB_APPLICATION_NOT_FOUND_MESSAGE);
+    }
+
+    const existingApplication = await this.prisma.jobApplication.findFirst({
+      where: {
+        id,
+        userId: user.id,
+      },
+      include: {
+        company: true,
+      },
+    });
+
+    if (!existingApplication) {
+      throw new NotFoundException(JOB_APPLICATION_NOT_FOUND_MESSAGE);
+    }
+
+    let targetCompanyId = existingApplication.company.id;
+
+    if (body.companyId) {
+      const company = await this.prisma.company.findFirst({
+        where: {
+          id: body.companyId,
+          userId: user.id,
+        },
+      });
+
+      if (!company) {
+        throw new NotFoundException('Company not found');
+      }
+
+      targetCompanyId = company.id;
+    }
+
+    const nextSalaryMin =
+      body.salaryMin ?? existingApplication.salaryMin ?? undefined;
+    const nestSalaryMax =
+      body.salaryMax ?? existingApplication.salaryMax ?? undefined;
+
+    validateSalaryRange(nextSalaryMin, nestSalaryMax);
+
+    const application = await this.prisma.jobApplication.update({
+      where: {
+        id: existingApplication.id,
+      },
+      data: {
+        companyId: targetCompanyId,
+        ...(body.positionTitle !== undefined
+          ? { positionTitle: body.positionTitle }
+          : {}),
+        ...(body.status !== undefined ? { status: body.status } : {}),
+        ...(body.appliedAt !== undefined
+          ? { appliedAt: body.appliedAt ? new Date(body.appliedAt) : null }
+          : {}),
+        ...(body.source !== undefined ? { source: body.source } : {}),
+        ...(body.location !== undefined ? { location: body.location } : {}),
+        ...(body.salaryMin !== undefined ? { salaryMin: body.salaryMin } : {}),
+        ...(body.salaryMax !== undefined ? { salaryMax: body.salaryMax } : {}),
+        ...(body.jobPostUrl !== undefined
+          ? { jobPostUrl: body.jobPostUrl }
+          : {}),
+        ...(body.notes !== undefined ? { notes: body.notes } : {}),
+      },
+      include: {
+        company: true,
+      },
+    });
+
+    return toJobApplicationDetail(application);
   }
 }
