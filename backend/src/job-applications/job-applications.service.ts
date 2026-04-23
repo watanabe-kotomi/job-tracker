@@ -158,15 +158,7 @@ export class JobApplicationsService {
       throw new NotFoundException(COMPANY_NOT_FOUND_MESSAGE);
     }
 
-    if (
-      body.salaryMin !== undefined &&
-      body.salaryMax !== undefined &&
-      body.salaryMin > body.salaryMax
-    ) {
-      throw new BadRequestException(
-        'salaryMin must be less than or equal to salaryMax',
-      );
-    }
+    validateSalaryRange(body.salaryMin, body.salaryMax);
 
     const application = await this.prisma.jobApplication.create({
       data: {
