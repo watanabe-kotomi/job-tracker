@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
@@ -20,6 +20,22 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
+    const accessToken = this.jwtService.sign({ sub: user.id, email: user.email });
+    return { accessToken };
+  }
+
+  async register(
+    email: string,
+    password: string,
+    displayName: string,
+  ): Promise<{ accessToken: string }> {
+    const existing = await this.usersService.findByEmail(email);
+    if (existing) {
+      throw new ConflictException('Email is already in use');
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const user = await this.usersService.create(email, passwordHash, displayName);
     const accessToken = this.jwtService.sign({ sub: user.id, email: user.email });
     return { accessToken };
   }

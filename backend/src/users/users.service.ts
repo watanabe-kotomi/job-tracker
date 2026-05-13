@@ -8,4 +8,10 @@ export class UsersService {
   async findByEmail(email: string) {
     return this.prisma.user.findUnique({ where: { email } });
   }
+
+  async create(email: string, passwordHash: string, displayName: string) {
+    return this.prisma.user.create({
+      data: { email, passwordHash, displayName },
+    });
+  }
 }
