@@ -6,12 +6,15 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { JobApplicationsService } from './job-applications.service';
 import { ListJobApplicationsQueryDto } from './dto/list-job-applications-query.dto';
 import { CreateJobApplicationDto } from './dto/create-job-application.dto';
 import { UpdateJobApplicationDto } from './dto/update-job-application.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('api/job-applications')
 export class JobApplicationsController {
   constructor(
