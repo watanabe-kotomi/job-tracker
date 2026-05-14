@@ -26,27 +26,15 @@ export class JobApplicationsService {
 
   async findAll(
     query: ListJobApplicationsQueryDto,
+    userId: string,
   ): Promise<PaginatedResponse<JobApplicationListItem>> {
     const { page, limit, skip } = getPagination({
       page: query.page,
       limit: query.limit,
     });
 
-    const user = await this.prisma.user.findUnique({
-      where: { email: 'demo@example.com' },
-    });
-
-    if (!user) {
-      return {
-        items: [],
-        page,
-        limit,
-        total: 0,
-      };
-    }
-
     const where = {
-      userId: user.id,
+      userId,
       ...(query.status ? { status: query.status } : {}),
       ...(query.companyId ? { companyId: query.companyId } : {}),
       ...(query.keyword
@@ -106,25 +94,17 @@ export class JobApplicationsService {
 
     return {
       items,
-      page: query.page,
-      limit: query.limit,
-      total: items.length,
+      page,
+      limit,
+      total,
     };
   }
 
-  async findOne(id: string): Promise<JobApplicationDetail> {
-    const user = await this.prisma.user.findUnique({
-      where: { email: 'demo@example.com' },
-    });
-
-    if (!user) {
-      throw new NotFoundException(JOB_APPLICATION_NOT_FOUND_MESSAGE);
-    }
-
+  async findOne(id: string, userId: string): Promise<JobApplicationDetail> {
     const application = await this.prisma.jobApplication.findFirst({
       where: {
         id,
-        userId: user.id,
+        userId,
       },
       include: {
         company: true,
@@ -138,19 +118,14 @@ export class JobApplicationsService {
     return toJobApplicationDetail(application);
   }
 
-  async create(body: CreateJobApplicationDto): Promise<JobApplicationDetail> {
-    const user = await this.prisma.user.findUnique({
-      where: { email: 'demo@example.com' },
-    });
-
-    if (!user) {
-      throw new NotFoundException(JOB_APPLICATION_NOT_FOUND_MESSAGE);
-    }
-
+  async create(
+    body: CreateJobApplicationDto,
+    userId: string,
+  ): Promise<JobApplicationDetail> {
     const company = await this.prisma.company.findFirst({
       where: {
         id: body.companyId,
-        userId: user.id,
+        userId,
       },
     });
 
@@ -162,7 +137,7 @@ export class JobApplicationsService {
 
     const application = await this.prisma.jobApplication.create({
       data: {
-        userId: user.id,
+        userId,
         companyId: body.companyId,
         positionTitle: body.positionTitle,
         status: body.status,
@@ -178,21 +153,12 @@ export class JobApplicationsService {
   async update(
     id: string,
     body: UpdateJobApplicationDto,
+    userId: string,
   ): Promise<JobApplicationDetail> {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        email: 'demo@example.com',
-      },
-    });
-
-    if (!user) {
-      throw new NotFoundException(JOB_APPLICATION_NOT_FOUND_MESSAGE);
-    }
-
     const existingApplication = await this.prisma.jobApplication.findFirst({
       where: {
         id,
-        userId: user.id,
+        userId,
       },
       include: {
         company: true,
@@ -209,7 +175,7 @@ export class JobApplicationsService {
       const company = await this.prisma.company.findFirst({
         where: {
           id: body.companyId,
-          userId: user.id,
+          userId,
         },
       });
 

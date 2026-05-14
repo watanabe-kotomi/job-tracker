@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { ListCompaniesQueryDto } from './dto/list-companies-query.dto';
 import {
   CompanyDetail,
@@ -20,27 +16,15 @@ export class CompaniesService {
 
   async findAll(
     query: ListCompaniesQueryDto,
+    userId: string,
   ): Promise<PaginatedResponse<CompanyListItem>> {
     const { page, limit, skip } = getPagination({
       page: query.page,
       limit: query.limit,
     });
 
-    const user = await this.prisma.user.findUnique({
-      where: { email: 'demo@example.com' },
-    });
-
-    if (!user) {
-      return {
-        items: [],
-        page,
-        limit,
-        total: 0,
-      };
-    }
-
     const where = {
-      userId: user.id,
+      userId,
       ...(query.keyword
         ? {
             name: {
@@ -83,18 +67,10 @@ export class CompaniesService {
     };
   }
 
-  async create(body: CreateCompanyDto): Promise<CompanyDetail> {
-    const user = await this.prisma.user.findUnique({
-      where: { email: 'demo@example.com' },
-    });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
+  async create(body: CreateCompanyDto, userId: string): Promise<CompanyDetail> {
     const existingCompany = await this.prisma.company.findFirst({
       where: {
-        userId: user.id,
+        userId,
         name: body.name,
       },
     });
@@ -105,7 +81,7 @@ export class CompaniesService {
 
     const company = await this.prisma.company.create({
       data: {
-        userId: user.id,
+        userId,
         name: body.name,
         websiteUrl: body.websiteUrl ?? null,
         country: body.country ?? null,

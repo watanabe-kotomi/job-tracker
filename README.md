@@ -1,35 +1,63 @@
 # Job Tracker
 
-A full-stack web application to manage job applications.
-- MVP under development
+A full-stack web application for tracking job applications throughout the hiring process.
 
-## Goal
+## Features
 
-Build a portfolio project with:
+- **Authentication** — JWT-based registration and login
+- **Job Applications** — Create and manage applications with status tracking, salary range, location, and notes
+- **Companies** — Manage companies linked to applications
+- **Filtering** — Filter applications by status, company, or keyword search
+- **Pagination** — Server-side pagination on all list endpoints
 
-- React
-- TypeScript
-- NestJS
+## Tech Stack
+
+**Frontend**
+- React 19 / TypeScript / Vite
+- React Router
+
+**Backend**
+- NestJS / TypeScript
+- Prisma ORM
 - PostgreSQL
-- AWS S3 later
+- Passport.js + JWT
 
-## Planned Features
+## Getting Started
 
-- User authentication
-- Job application CRUD
-- Status management
-- Notes
-- Optional file upload
+### Prerequisites
+
+- Node.js 20+
+- PostgreSQL
+
+### Backend
+
+```bash
+cd backend
+cp .env.example .env    # fill in DATABASE_URL and JWT_SECRET
+npm install
+npx prisma migrate dev
+npm run start:dev
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open http://localhost:5173
 
 ## Project Structure
 
-- frontend: React app
-- backend: NestJS API
+```
+job-tracker/
+├── backend/    # NestJS API  (port 3000)
+└── frontend/   # React app   (port 5173)
+```
 
-## Development Workflow
+## Development
 
-- AI-assisted development using Claude Code / ChatGPT for code generation and scaffolding
-- All architectural decisions, API design, and data modeling are reviewed and finalized manually
-- Feature-based branching strategy with conventional commits
-- Incremental refactoring during implementation to maintain code clarity and consistency
-- Focus on maintainable backend structure (NestJS + Prisma) with explicit domain boundaries
+Feature-based branching with conventional commits.
+Architectural decisions, API design, and data modeling were designed and reviewed manually.
