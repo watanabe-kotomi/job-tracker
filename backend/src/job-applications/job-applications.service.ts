@@ -94,9 +94,9 @@ export class JobApplicationsService {
 
     return {
       items,
-      page: query.page,
-      limit: query.limit,
-      total: items.length,
+      page,
+      limit,
+      total,
     };
   }
 
